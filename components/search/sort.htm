@@ -1,0 +1,16 @@
+{% if resultsNumFound %}
+<div class="sort-wrapper">
+  Sort by:
+  <ul class="sort-fields">
+    <li class="sort-field {{ sorts.score }}">
+      <a href="{{ sortsUrls.score }}">Score</a>
+    </li>
+    <li class="sort-field {{ attribute(sorts, "title_" ~ localeCode ~ "_ts" ) }}">
+      <a href="{{ attribute(sortsUrls, "title_" ~ localeCode ~ "_ts" ) }}">Title</a>
+    </li>
+    <li class="sort-field {{ sorts.mtime_dt }}">
+      <a href="{{ sortsUrls.mtime_dt }}">Date</a>
+    </li>
+  </ul>
+</div>
+{% endif %}

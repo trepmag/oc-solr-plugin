@@ -1,0 +1,11 @@
+{% if resultsNumFound %}
+<ul>
+  {% for item in __SELF__.getModelResultset %}
+  {% partial '@result' item=item %}
+  {% endfor %}
+</ul>
+{% elseif solrException %}
+  <p>{{ 'Search engine encountered an internal error.'|_ }}</p>
+{% else %}
+  <p>{{ 'Your search yielded no results!'|_ }}!</p>
+{% endif %}

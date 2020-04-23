@@ -1,0 +1,17 @@
+{% if facet.items %}
+<ul class="items facet {{ facet.field }}">
+  {% for item in facet.items %}
+  <li class="item">
+    {% if item.urlRemove %}
+    <a href="{{ item.urlRemove }}" class="filter remove" rel="nofollow">(-)</a>
+    {% endif %}
+    {% if item.count and item.url %}
+    <a href="{{ item.url }}" class="filter add" rel="nofollow">{{ item.value }} ({{ item.count }})</a>
+    {% else %}
+    {{ item.value }} ({{ item.count }})
+    {% endif %}
+  </li>
+  {% partial '@facet' facet=item.child %}
+  {% endfor %}
+</ul>
+{% endif %}

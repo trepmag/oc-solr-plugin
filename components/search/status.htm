@@ -1,0 +1,9 @@
+<span class="status">
+  {% if resultsNumFound %}
+    {{ 'Found :rowStart - :rowEnd of :total item(s)'|_({rowStart: rowStart, rowEnd: rowEnd, total: resultsNumFound}) }}
+  {% elseif solrException %}
+    {{ 'Error'|_ }}!
+  {% else %}
+    {{ 'Found :total item'|_({total: resultsNumFound}) }}
+  {% endif %}
+</span>

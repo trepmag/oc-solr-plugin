@@ -1,0 +1,25 @@
+{
+    "name": "trepmag/solr",
+    "description": "Solr",
+    "type": "october-plugin",
+    "require": {
+        "solarium/solarium": "^5.1"
+    },
+    "scripts": {
+        "post-create-project-cmd": [
+            "php artisan key:generate",
+            "php artisan package:discover"
+        ],
+        "post-update-cmd": [
+            "php artisan october:util set build",
+            "php artisan package:discover"
+        ]
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Trepmag Cirdec",
+            "email": "cgampert@gmail.com"
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+<hr>
+{% if resultsNumFound %}
+{% if pagePreviousUrl %}
+<a href="{{ pagePreviousUrl }}">« Previous</a>
+{% else  %}
+« Previous
+{% endif  %}
+&nbsp;|&nbsp;
+{% if pageNextUrl %}
+<a href="{{ pageNextUrl }}">Next »</a>
+{% else %}
+Next »
+{% endif  %}
+{% endif  %}

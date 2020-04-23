@@ -1,0 +1,20 @@
+<div>
+  <h1>Search</h1>
+  <form method="GET">
+    <input type="text" name="q" value="{{ input('q') | escape }}">
+    <input type="submit"> <a href="{{ this.page.id | page }}">Reset</a>
+  </form>
+
+  <h2>Results</h2>
+  <div>
+    {% partial '@status' %}... {% partial '@sort' %}
+  </div>
+  <hr>
+  <div id="result">
+    {% partial '@results' %}
+  </div>
+  {% partial '@pagination' %}
+  <h2>Facet(s)</h2>
+  <h3>Type</h3>
+  {% partial '@facet' facet=facets.type_label_s %}
+</div>
