@@ -18,6 +18,10 @@ class Search extends \Cms\Classes\ComponentBase {
     protected $localeCodes = [];
     protected $facets = [];
     protected $facetsFields = [];
+    protected $jsonFacetApi = [
+      'string' => null,
+      'array' => null,
+    ];
     protected $sortsDefaultDirections = [];
     protected $pageSize = 10;
     protected $pageStart = NULL;
@@ -80,6 +84,12 @@ class Search extends \Cms\Classes\ComponentBase {
                 'validationPattern' => '^[\w-]+(,[\w-]+)*$',
                 'validationMessage' => 'The Facet fields property can only contains non accentued word with no space.'
             ],
+            'jsonFacetApi' => [
+                'title' => 'JSON Facet API',
+                'description' => 'See https://lucene.apache.org/solr/guide/json-facet-api.html.',
+                'default' => '',
+                'type' => 'text',
+            ],
             'urlQueryStringFilter' => [
                 'title' => 'Url query string filter',
                 'description' => "Fitler passing an url query string filter (which might be overmerged by the real url query string).",
@@ -134,7 +144,7 @@ class Search extends \Cms\Classes\ComponentBase {
         }
         $qb->addKeyword($keyword);
 
-        // Facets
+        // Facets field
         $this->facetsFields = !empty($this->property('facetFields')) ? explode(',', $this->property('facetFields')) : [];
         if ($this->getFacetsFields()) {
             // Facet query conditions
@@ -146,7 +156,6 @@ class Search extends \Cms\Classes\ComponentBase {
             foreach ($qsf as $value) {
                 $qb->addKeyword($value);
             }
-
             // Create facets
             $facetSet = $this->query->getFacetSet();
             foreach ($this->getFacetsFields() as $facetField) {
@@ -159,6 +168,18 @@ class Search extends \Cms\Classes\ComponentBase {
                     $facet->addFields(str_replace('-', ',', $facetField));
                 }
             }
+        }
+
+        // JSON Facet API
+        if (!empty($this->property('jsonFacetApi'))) {
+            $this->jsonFacetApi['string'] = html_entity_decode($this->property('jsonFacetApi'));
+            $this->jsonFacetApi['array'] = json_decode($this->jsonFacetApi['string'], true);
+            $this->client->getPlugin('customizerequest')
+              ->createCustomization('json.facet')
+              ->setType('param')
+              ->setName('json.facet')
+              ->setValue($this->jsonFacetApi['string'])
+            ;
         }
 
         // Sort
@@ -196,11 +217,8 @@ class Search extends \Cms\Classes\ComponentBase {
             $this->solrException = $e;
         }
 
-        if ($this->solariumResultset) {
-            foreach ($this->getFacetsFields() as $facetField) {
-                $this->setFacet($facetField, $this->solariumResultset->getFacetSet()->getFacet($facetField));
-            }
-        }
+        // Build facets structure
+        $this->setFacets();
     }
 
     public function getSolariumResultset() {
@@ -256,22 +274,34 @@ class Search extends \Cms\Classes\ComponentBase {
         $this->page['localeCode'] = app()->getLocale();
     }
 
+    public function setFacets() {
+        if ($this->solariumResultset && $this->solariumResultset->getFacetSet()) {
+            foreach ($this->solariumResultset->getFacetSet() as $facetField => $facet) {
+              $this->setFacet($facetField, $this->solariumResultset->getFacetSet()->getFacet($facetField));
+            }
+        }
+    }
     public function setFacet($field, $items): void {
         $this->facets[$field] = [
             'field' => $field,
             'items' => [],
         ];
-        if (!is_a($items, Facet\Pivot\Pivot::class)) {
-            foreach ($items as $value => $count) {
-                $this->facets[$field]['items'][$value] = $this->facetItemBuilder(
-                        $field,
-                        $value,
-                        $count
-                );
-            }
-        }
-        else {
-            $this->facets[$field]['items'] = $this->pivotBuilder($items->getPivot());
+        switch (get_class($items)) {
+          case Facet\Field::class:
+              foreach ($items as $value => $count) {
+                  $this->facets[$field]['items'][$value] = $this->facetItemBuilder(
+                          $field,
+                          $value,
+                          $count
+                  );
+              }
+              break;
+          case Facet\Pivot\Pivot::class:
+              $this->facets[$field]['items'] = $this->facetPivotBuilder($items->getPivot());
+              break;
+          case Facet\Buckets::class:
+              $this->facets[$field]['items'] = $this->facetBucketBuilder($items->getBuckets(), $this->jsonFacetApi['array'][$field]);
+              break;
         }
     }
 
@@ -311,7 +341,7 @@ class Search extends \Cms\Classes\ComponentBase {
      * @param Facet\Pivot\Pivot $pivot
      * @return array
      */
-    private function pivotBuilder($pivot) {
+    private function facetPivotBuilder($pivot) {
         $out = [];
 
         foreach ($pivot as /* @var $pivotItem Facet\Pivot\PivotItem */ $pivotItem) {
@@ -319,8 +349,40 @@ class Search extends \Cms\Classes\ComponentBase {
                     $pivotItem->getField(),
                     $pivotItem->getValue(),
                     $pivotItem->getCount(),
-                    $this->pivotBuilder($pivotItem->getPivot())
+                    $this->facetPivotBuilder($pivotItem->getPivot())
             );
+        }
+
+        return $out;
+    }
+
+    /**
+     *
+     * @param array $jsonFacetApi
+     * @param Facet\Bucket $buckets
+     * @return array
+     */
+    private function facetBucketBuilder($buckets, $jsonFacetApiArray) {
+        $out = [];
+
+        if (!empty($jsonFacetApiArray['facet'])) {
+          $childFieldAlias = key($jsonFacetApiArray['facet']);
+          $jsonFacetApiArraySub = !empty($jsonFacetApiArray['facet'][$childFieldAlias]) ? $jsonFacetApiArray['facet'][$childFieldAlias] : null;
+        }
+
+        if ($jsonFacetApiArray) {
+            foreach ($buckets as /* @var $pivotItem Facet\Bucket */ $bucket) {
+                $child = [];
+                if (!empty($bucket->getFacets()['child'])) {
+                  $child = $this->facetBucketBuilder($bucket->getFacets()['child']->getBuckets(), $jsonFacetApiArraySub);
+                }
+                $out[$bucket->getValue()] = $this->facetItemBuilder(
+                        $jsonFacetApiArray['field'],
+                        $bucket->getValue(),
+                        $bucket->getCount(),
+                        $child
+                );
+            }
         }
 
         return $out;

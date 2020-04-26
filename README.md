@@ -21,11 +21,11 @@ Add the `solrSearch` component to a page (https://octobercms.com/docs/cms/compon
 
 The `solrSearch` component defines the following properties:
 
-#### 1. pageSize
+#### pageSize
 
 No comments...
 
-#### 2. facetFields
+#### facetFields
 
 Insert Solr fields separated by comma(s) to be used as facet. To define a pivot,
 combines Solr fields by separating them with a dash.
@@ -35,7 +35,16 @@ Example:
 facetFields = "type_label_str,datatype_category_str-datatype_str,categories_str"
 ```
 
-#### 3. urlQueryStringFilter
+#### jsonFacetApi
+
+See https://lucene.apache.org/solr/guide/json-facet-api.html.
+
+Example:
+```
+facetFields = "{"year":{"type":"terms","field":"year_i","sort":{"index":"desc"}}}"
+```
+
+#### urlQueryStringFilter
 
 Pass an url with query string (or only the query string part) that apply the
 desired filter.
@@ -47,7 +56,7 @@ urlQueryStringFilter = "q=med&facets%5Btype_label_str%3AData+Source%5D=type_labe
 
 Warning: double quote must be escaped as `%22`.
 
-#### 4. edismaxOptions
+#### edismaxOptions
 
 Set edismax options (which includes dismax) one by line. See [Solarium PHP DisMax component](https://solarium.readthedocs.io/en/stable/queries/select-query/building-a-select-query/components/dismax-component/).
 
