@@ -14,6 +14,7 @@ return [
         ]
     ],
     'search_index_classes' => [
+        \Trepmag\Solr\Classes\SearchIndexPage::class,
         \Trepmag\Solr\Classes\SearchIndexRainlabPage::class,
     ],
 ];
