@@ -120,7 +120,7 @@ class Search extends \Cms\Classes\ComponentBase {
 
         // Hide hidden items for visitors
         if (!BackendAuth::getUser()) {
-            $this->query->addParam('fq', 'is_hidden_i:1');
+            $this->query->addParam('fq', 'is_hidden_i:0');
         }
 
         // Get url query string filter if any

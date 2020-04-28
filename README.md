@@ -118,7 +118,7 @@ class SearchIndexMyData extends SearchIndex {
     protected function setDefaultFieldsValues($item) {
         $this->id = $item->dataid;
         $this->type = 'Data Source';
-        $this->is_hidden = $item->datadisplay ? 1 : 0;
+        $this->is_hidden = $item->datadisplay ? 0 : 1;
         $this->mtimeDate = \DateTime::createFromFormat('Y-m-d', $item->pubdate);
         $this->title = $item->title;
         $this->abstract = $item->abstract;

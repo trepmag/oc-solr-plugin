@@ -1,1 +1,4 @@
 1.0.1: First version of Solr
+1.0.2:
+    - Add jsonFacetApi parameter input and processing
+    - Fix is_hidden filter
