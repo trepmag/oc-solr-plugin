@@ -22,6 +22,7 @@ class Search extends \Cms\Classes\ComponentBase {
       'string' => null,
       'array' => null,
     ];
+    protected $facetFilterRequestInputName = 'f';
     protected $sortsDefaultDirections = [];
     protected $pageSize = 10;
     protected $pageStart = NULL;
@@ -148,12 +149,12 @@ class Search extends \Cms\Classes\ComponentBase {
         $this->facetsFields = !empty($this->property('facetFields')) ? explode(',', $this->property('facetFields')) : [];
         if ($this->getFacetsFields()) {
             // Facet query conditions
-            $qsf = [];
-            if (!empty($uqsf_array['facets'])) {
-                $qsf =  $uqsf_array['facets'];
+            $fri = [];
+            if (!empty($uqsf_array[$this->facetFilterRequestInputName])) {
+                $fri =  $uqsf_array[$this->facetFilterRequestInputName];
             }
-            $qsf += Request::input('facets', []);
-            foreach ($qsf as $value) {
+            $fri += $this->getFacetsRequestInput();
+            foreach ($fri as $value) {
                 $qb->addKeyword($value);
             }
             // Create facets
@@ -311,29 +312,47 @@ class Search extends \Cms\Classes\ComponentBase {
 
     function makeUrl($query_string, $value, $unsets = []) {
         $out = $this->controller->currentPageUrl();
-        $ri = Request::input();
+        $fri = Request::input();
+        $fri[$this->facetFilterRequestInputName] = $this->getFacetsRequestInput();
         if ($query_string) {
-            $ri[$query_string] = $value;
+            $fri[$query_string] = $value;
         }
         foreach ($unsets as $unset => $subUnsets) {
             if (is_array($subUnsets)) {
                 foreach ($subUnsets as $subUnset => $void) {
-                    if (isset($ri[$unset][$subUnset])) {
-                        unset($ri[$unset][$subUnset]);
+                    if (isset($fri[$unset][$subUnset])) {
+                        unset($fri[$unset][$subUnset]);
                     }
                 }
-            } elseif (isset($ri[$unset])) {
-                unset($ri[$unset]);
+            } elseif (isset($fri[$unset])) {
+                unset($fri[$unset]);
             }
         }
-        if (!empty($ri)) {
-            $out .= '?' . http_build_query($ri);
+        if (!empty($fri)) {
+            $out .= '?' . http_build_query($fri);
         }
         return $out;
     }
 
     public function getFacetsFields() {
         return $this->facetsFields;
+    }
+
+    private function getFacetsRequestInput($flip = false) {
+        static $flipped;
+        static $facets;
+
+        if (!isset($facets)) {
+            $facets = array_values(Request::input($this->facetFilterRequestInputName, []));
+        }
+        $out = $facets;
+        if ($flip) {
+            if (!isset($flipped)) {
+                $flipped = array_flip($out);
+            }
+            $out = $flipped;
+        }
+        return $out;
     }
 
     /**
@@ -397,22 +416,31 @@ class Search extends \Cms\Classes\ComponentBase {
      * @return type
      */
     private function facetItemBuilder($field, $value, $count, $items = []) {
-        $qsf = Request::input('facets', []);
-        $qs_facet_key = "$field:$value";
-        $url = $this->makeUrl("facets[$qs_facet_key]", "$field:\"$value\"", $unsets = ['page' => true]);
-        $urlRemove = $this->makeUrl(NULL, NULL, $unsets = ['facets' => [$qs_facet_key => true]]);
+        $rif_flipped = $this->getFacetsRequestInput($flip = true);
+        $filter_key = count($this->getFacetsRequestInput());
+        $filter_value = "$field:\"$value\"";
 
+        $url = null;
+        $urlRemove = null;
+        if (isset($rif_flipped[$filter_value])) {
+            $filter_key_remove = $rif_flipped[$filter_value];
+            $urlRemove = $this->makeUrl(NULL, NULL, $unsets = [
+                $this->facetFilterRequestInputName => [$filter_key_remove = true]
+            ]);
+        }
+        else {
+            $url = $this->makeUrl("{$this->facetFilterRequestInputName}[$filter_key]", $filter_value, $unsets = ['page' => true]);
+        }
         return [
             'field' => $field,
             'value' => $value,
             'count' => $count,
-            'url' => !empty($qsf[$qs_facet_key]) ? NULL : $url,
-            'urlRemove' => empty($qsf[$qs_facet_key]) ? NULL : $urlRemove,
+            'url' => $url,
+            'urlRemove' => $urlRemove,
             'child' => [
                 'field' => $field,
                 'items' => $items,
             ],
-
         ];
     }
 
