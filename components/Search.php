@@ -155,7 +155,10 @@ class Search extends \Cms\Classes\ComponentBase {
             }
             $fri += $this->getFacetsRequestInput();
             foreach ($fri as $value) {
-                $qb->addKeyword($value);
+                $f_components = explode(':', $value);
+                if (count($f_components)> 1) {
+                    $qb->addKeyword("$f_components[0]:" . $this->query->getHelper()->escapePhrase($f_components[1]));
+                }
             }
             // Create facets
             $facetSet = $this->query->getFacetSet();
@@ -418,7 +421,7 @@ class Search extends \Cms\Classes\ComponentBase {
     private function facetItemBuilder($field, $value, $count, $items = []) {
         $rif_flipped = $this->getFacetsRequestInput($flip = true);
         $filter_key = count($this->getFacetsRequestInput());
-        $filter_value = "$field:\"$value\"";
+        $filter_value = "$field:$value";
 
         $url = null;
         $urlRemove = null;
