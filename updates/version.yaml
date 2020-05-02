@@ -2,3 +2,4 @@
 1.0.2:
     - Add jsonFacetApi parameter input and processing
     - Fix is_hidden filter
+1.0.3: Improve facet filter behavior, querystring naming and value processing
