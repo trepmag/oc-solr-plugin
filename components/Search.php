@@ -148,18 +148,6 @@ class Search extends \Cms\Classes\ComponentBase {
         // Facets field
         $this->facetsFields = !empty($this->property('facetFields')) ? explode(',', $this->property('facetFields')) : [];
         if ($this->getFacetsFields()) {
-            // Facet query conditions
-            $fri = [];
-            if (!empty($uqsf_array[$this->facetFilterRequestInputName])) {
-                $fri =  $uqsf_array[$this->facetFilterRequestInputName];
-            }
-            $fri += $this->getFacetsRequestInput();
-            foreach ($fri as $value) {
-                $f_components = explode(':', $value);
-                if (count($f_components)> 1) {
-                    $qb->addKeyword("$f_components[0]:" . $this->query->getHelper()->escapePhrase($f_components[1]));
-                }
-            }
             // Create facets
             $facetSet = $this->query->getFacetSet();
             foreach ($this->getFacetsFields() as $facetField) {
@@ -184,6 +172,19 @@ class Search extends \Cms\Classes\ComponentBase {
               ->setName('json.facet')
               ->setValue($this->jsonFacetApi['string'])
             ;
+        }
+
+        // Facet query conditions
+        $fri = [];
+        if (!empty($uqsf_array[$this->facetFilterRequestInputName])) {
+            $fri =  $uqsf_array[$this->facetFilterRequestInputName];
+        }
+        $fri += $this->getFacetsRequestInput();
+        foreach ($fri as $value) {
+            $f_components = explode(':', $value);
+            if (count($f_components)> 1) {
+                $qb->addKeyword("$f_components[0]:" . $this->query->getHelper()->escapePhrase($f_components[1]));
+            }
         }
 
         // Sort
