@@ -26,4 +26,8 @@ class SearchIndexRainlabPage extends SearchIndex {
         return $pages;
     }
 
+    public static function getUpdateEventClass() {
+        return SearchIndexUpdateEventRainlabPage::class;
+    }
+
 }

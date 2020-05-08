@@ -5,14 +5,17 @@ namespace Trepmag\Solr\Classes;
 use Config;
 
 /*
- * Search index update event.
+ * Search index update event for objects; defines update listner and handlers.
+ *
+ * See OctoberCMS Events:
+ * https://octobercms.com/docs/services/events#event-class-subscribe
  *
  * @todo:
  * - No Cms\Classes\Page update or delete event exists; need to implements a patch at core level
  * - Remove object from index on rainabPage delete (needs this pull request to be merged: https://github.com/rainlab/pages-plugin/pull/403)
  */
 
-class SearchIndexUpdateEvent {
+abstract class SearchIndexUpdateEvent {
 
     private $solrClient = NULL;
     private $searchIndexclasses = NULL; # SearchIndex classes
@@ -22,18 +25,13 @@ class SearchIndexUpdateEvent {
         $this->searchIndexclasses = Config::get('solr.search_index_classes', []);
     }
 
-    public function subscribe($events) {
-        $events->listen('eloquent.saved: *', $this->getClass() . '@handleModelUpdate');
-        $events->listen('eloquent.deleted: *', $this->getClass() . '@handleModelDelete');
-        $events->listen('pages.object.save', $this->getClass() . '@handleRainlabPageUpdate');
-    }
+    public abstract function subscribe($events);
 
-    public function handleModelUpdate(\October\Rain\Database\Model $object) {
-
+    protected function Update($object) {
         $searchIndexClass = $this->getSearchIndexclassByObjectClass(get_class($object));
         if ($searchIndexClass) {
 
-            // Get search indexing material
+            // Build document to index
             $searchIndex = new $searchIndexClass;
             $update = $this->solrClient->createUpdate();
             $document = $update->createDocument();
@@ -46,8 +44,7 @@ class SearchIndexUpdateEvent {
         }
     }
 
-    public function handleModelDelete(\October\Rain\Database\Model $object) {
-
+    protected function Delete($object) {
         $searchIndexClass = $this->getSearchIndexclassByObjectClass(get_class($object));
         if ($searchIndexClass) {
 
@@ -65,30 +62,7 @@ class SearchIndexUpdateEvent {
         }
     }
 
-    /**
-     *
-     * @param \RainLab\Pages\Controllers\Index $index
-     * @param \RainLab\Pages\Classes\Page $object
-     * @param type $type
-     */
-    public function handleRainlabPageUpdate(\RainLab\Pages\Controllers\Index $index, $object, $type) {
-        $searchIndexClass = $this->getSearchIndexclassByObjectClass(get_class($object));
-        if ($searchIndexClass) {
-
-            // Get search indexing material
-            $searchIndex = new $searchIndexClass;
-            $update = $this->solrClient->createUpdate();
-            $document = $update->createDocument();
-
-            // Apply indexing
-            $document = $searchIndex->buildDoc($object, $document);
-            $update->addDocument($document);
-            $update->addCommit();
-            $result = $this->solrClient->update($update);
-        }
-    }
-
-    public function getSearchIndexclassByObjectClass($objectClass) {
+    protected function getSearchIndexclassByObjectClass($objectClass) {
         static $out = [];
 
         if (!isset($out[$objectClass])) {
@@ -102,10 +76,6 @@ class SearchIndexUpdateEvent {
         }
 
         return $out[$objectClass];
-    }
-
-    public function getClass() {
-        return '\\' . get_class();
     }
 
 }

@@ -3,6 +3,7 @@
 use Backend;
 use System\Classes\PluginBase;
 use Event;
+use Config;
 
 /**
  * Solr Plugin Information File
@@ -44,7 +45,16 @@ class Plugin extends PluginBase
     public function boot()
     {
         parent::boot();
-        Event::subscribe(new \Trepmag\Solr\Classes\SearchIndexUpdateEvent);
+
+        // Subscribe any search index update event classes
+        $updateEventClassesAdded = [];
+        foreach (Config::get('solr.search_index_classes', []) as $class) {
+            $updateEventClass = $class::getUpdateEventClass();
+            if (!in_array($updateEventClass, $updateEventClassesAdded)) {
+                Event::subscribe(new $updateEventClass);
+                $updateEventClassesAdded[] = $updateEventClass;
+            }
+        }
     }
 
     /**

@@ -6,7 +6,9 @@ use Solarium\Core\Query\DocumentInterface;
 use View;
 
 /**
- * Define what to push in the index for a given model object.
+ * Defines for a given object (might be Model object or any other type):
+ * - what to push in the index: see buildDoc()
+ * - when the index must be updated (index crud): see getUpdateEventClass()
  */
 abstract class SearchIndex {
 
@@ -44,6 +46,8 @@ abstract class SearchIndex {
     }
 
     abstract public static function getObjectClass();
+
+    abstract public static function getUpdateEventClass();
 
     /**
      * Set default object fields values to be indexed.

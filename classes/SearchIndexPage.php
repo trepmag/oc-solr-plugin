@@ -34,4 +34,8 @@ class SearchIndexPage extends SearchIndex {
         return $pages;
     }
 
+    public static function getUpdateEventClass() {
+        return SearchIndexUpdateEventPage::class;
+    }
+
 }
