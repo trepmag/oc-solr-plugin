@@ -29,16 +29,16 @@ class UpdateIndex extends Base {
 
         $total = 0;
         $i = 1;
-        $this->output->writeln('Items to update:');
+        $this->output->writeln('Objects to update:');
         foreach (Config::get('solr.search_index_classes', []) as $class) {
             $index = new $class;
-            $items = $index->getItems();
-            $count = count($items);
+            $objects = $index->getObjects();
+            $count = count($objects);
             $this->output->block($class . ': ' . $count);
             $total += $count;
-            foreach ($items as $item) {
+            foreach ($objects as $object) {
                 $doc = $update->createDocument();
-                $documents[] = $index->buildDoc($item, $doc);
+                $documents[] = $index->buildDoc($object, $doc);
                 if ($i % $this->option('batch-size') == 0 || $i == $total) {
                     $update->addDocuments($documents);
                     $update->addCommit();

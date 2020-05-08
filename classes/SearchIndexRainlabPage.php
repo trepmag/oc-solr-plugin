@@ -10,18 +10,18 @@ class SearchIndexRainlabPage extends SearchIndex {
         return \RainLab\Pages\Classes\Page::class;
     }
 
-    protected function setDefaultFieldsValues($item) {
-        $this->id = $item->id;
+    protected function setDefaultFieldsValues($object) {
+        $this->id = $object->id;
         $this->type = 'Page';
-        $this->is_hidden = $item->viewBag['is_hidden'];
-        $this->mtimeDate = \DateTime::createFromFormat('U', $item->mtime);
+        $this->is_hidden = $object->viewBag['is_hidden'];
+        $this->mtimeDate = \DateTime::createFromFormat('U', $object->mtime);
         foreach ($this->localeCodes as $localCode) {
-            $this->title[$localCode] = $item->getAttributeTranslated('viewBag', $localCode)['title'];
-            $this->abstract[$localCode] = $item->getAttributeTranslated('markup', $localCode);
+            $this->title[$localCode] = $object->getAttributeTranslated('viewBag', $localCode)['title'];
+            $this->abstract[$localCode] = $object->getAttributeTranslated('markup', $localCode);
         }
     }
 
-    public function getItems() {
+    public function getObjects() {
         $pages = Page::all();
         return $pages;
     }

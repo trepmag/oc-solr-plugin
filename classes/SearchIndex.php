@@ -5,6 +5,9 @@ namespace Trepmag\Solr\Classes;
 use Solarium\Core\Query\DocumentInterface;
 use View;
 
+/**
+ * Define what to push in the index for a given model object.
+ */
 abstract class SearchIndex {
 
     // Default fields value to index
@@ -43,17 +46,16 @@ abstract class SearchIndex {
     abstract public static function getObjectClass();
 
     /**
-     * Get default item fields values to be indexed.
+     * Set default object fields values to be indexed.
      *
-     * @param type $item, instance of a data source to be indexed
-     * @return array of $id, $type, $is_hidden, $title, $abstract
+     * @param type $object, instance of a model to be indexed
      */
-    abstract protected function setDefaultFieldsValues($item);
+    abstract protected function setDefaultFieldsValues($object);
 
-    public function buildDoc($item, DocumentInterface $doc) {
+    public function buildDoc($object, DocumentInterface $doc) {
 
         // Set default fields values
-        $this->setDefaultFieldsValues($item);
+        $this->setDefaultFieldsValues($object);
 
         // Build doc
         $doc->id = $this->buildDocId($this->id);
@@ -70,7 +72,7 @@ abstract class SearchIndex {
 
         // Fill in the _text_txt_* fields
         foreach ($this->localeCodes as $localeCode) {
-            $doc->{"_text_txt_$localeCode"} = $this->buildDocText($item, $doc, $localeCode);
+            $doc->{"_text_txt_$localeCode"} = $this->buildDocText($object, $doc, $localeCode);
         }
         return $doc;
     }
@@ -79,14 +81,14 @@ abstract class SearchIndex {
         return $this::getObjectClass() . ':' . $id;
     }
 
-    public function buildDocText($item, DocumentInterface $doc, $localeCode) {
+    public function buildDocText($object, DocumentInterface $doc, $localeCode) {
         $view = view($this->path_hint_view_document_text, [
-            'item' => $item,
+            'object' => $object,
             'doc' => $doc,
             'localeCode' => $localeCode,
         ]);
         return $view->render();
     }
 
-    abstract public function getItems();
+    abstract public function getObjects();
 }

@@ -115,26 +115,26 @@ class SearchIndexMyData extends SearchIndex {
     }
 
     // Set default fields values to be indexed
-    protected function setDefaultFieldsValues($item) {
-        $this->id = $item->dataid;
+    protected function setDefaultFieldsValues($object) {
+        $this->id = $object->dataid;
         $this->type = 'Data Source';
-        $this->is_hidden = $item->datadisplay ? 0 : 1;
-        $this->mtimeDate = \DateTime::createFromFormat('Y-m-d', $item->pubdate);
-        $this->title = $item->title;
-        $this->abstract = $item->abstract;
+        $this->is_hidden = $object->datadisplay ? 0 : 1;
+        $this->mtimeDate = \DateTime::createFromFormat('Y-m-d', $object->pubdate);
+        $this->title = $object->title;
+        $this->abstract = $object->abstract;
     }
 
     // Optionally override the following method to index other fields
-    public function buildDoc($item, DocumentInterface $doc) {
-        parent::buildDoc($item, $doc);
+    public function buildDoc($object, DocumentInterface $doc) {
+        parent::buildDoc($object, $doc);
 
         // Other fields to add to the index
-        $doc->datatype_s = $item->DataType->datatype;
+        $doc->datatype_s = $object->DataType->datatype;
 
         return $doc;
     }
 
-    public function getItems() {
+    public function getObject() {
         $myDatas = MyData::whereNotNull('dataid')->Where('dataid', '<>', '');
         return $myDatas->get();
     }

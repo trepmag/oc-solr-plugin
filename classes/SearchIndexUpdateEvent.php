@@ -9,7 +9,7 @@ use Config;
  *
  * @todo:
  * - No Cms\Classes\Page update or delete event exists; need to implements a patch at core level
- * - Remove item from index on rainabPage delete (needs this pull request to be merged: https://github.com/rainlab/pages-plugin/pull/403)
+ * - Remove object from index on rainabPage delete (needs this pull request to be merged: https://github.com/rainlab/pages-plugin/pull/403)
  */
 
 class SearchIndexUpdateEvent {

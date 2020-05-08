@@ -10,21 +10,21 @@ class SearchIndexPage extends SearchIndex {
         return Page::class;
     }
 
-    protected function setDefaultFieldsValues($item) {
-        $this->id = $item->id;
+    protected function setDefaultFieldsValues($object) {
+        $this->id = $object->id;
         $this->type = 'Page';
-        $this->is_hidden = $item->getAttribute('is_hidden');
-        $this->mtimeDate = \DateTime::createFromFormat('U', $item->mtime);
+        $this->is_hidden = $object->getAttribute('is_hidden');
+        $this->mtimeDate = \DateTime::createFromFormat('U', $object->mtime);
         foreach ($this->localeCodes as $localCode) {
-            $this->title[$localCode] = $item->getAttributeTranslated('title', $localCode);
-            $this->abstract[$localCode] = $item->getAttributeTranslated('description', $localCode);
+            $this->title[$localCode] = $object->getAttributeTranslated('title', $localCode);
+            $this->abstract[$localCode] = $object->getAttributeTranslated('description', $localCode);
         }
     }
 
     /**
      * Get all pages without url parameter.
      */
-    public function getItems() {
+    public function getObjects() {
         $pages = [];
         foreach (Page::all() as $page) {
             if (preg_match('/\:\w/', $page->getAttribute('url')) === 0) {
