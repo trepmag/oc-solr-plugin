@@ -41,12 +41,12 @@ class UpdateIndex extends Base {
                 $documents[] = $index->buildDoc($object, $doc);
                 if ($i % $this->option('batch-size') == 0 || $i == $total) {
                     $update->addDocuments($documents);
-                    $update->addCommit();
                     $documents = [];
                 }
                 $i++;
             }
         }
+        $update->addCommit();
         $result = $this->client->update($update);
 
         $this->output->writeln('Updated executed:');
