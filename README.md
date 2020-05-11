@@ -107,11 +107,17 @@ namespace Foo\Bar\Classes;
 use Trepmag\Solr\Classes\SearchIndex;
 use Foo\Bar\Models\MyData;
 use Solarium\Core\Query\DocumentInterface;
+use \Trepmag\Solr\Classes\SearchIndexUpdateEventDbModel;
 
 class SearchIndexMyData extends SearchIndex {
 
     public static function getObjectClass() {
         return \Foo\Bar\Models\MyData::class;
+    }
+
+    public function getObjects() {
+        $myDatas = $this->getObjectClass()::whereNotNull('dataid')->Where('dataid', '<>', '');
+        return $myDatas->get();
     }
 
     // Set default fields values to be indexed
@@ -134,9 +140,8 @@ class SearchIndexMyData extends SearchIndex {
         return $doc;
     }
 
-    public function getObject() {
-        $myDatas = MyData::whereNotNull('dataid')->Where('dataid', '<>', '');
-        return $myDatas->get();
+    public static function getUpdateEventClass() {
+        return SearchIndexUpdateEventDbModel::class;
     }
 
 }

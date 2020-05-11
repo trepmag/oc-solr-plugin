@@ -7,7 +7,8 @@ use View;
 
 /**
  * Defines for a given object (might be Model object or any other type):
- * - what to push in the index: see buildDoc()
+ * - data to push in the index: see getObjectClass() and getObjects()
+ * - how to push data item in the index: see buildDoc()
  * - when the index must be updated (index crud): see getUpdateEventClass()
  */
 abstract class SearchIndex {
