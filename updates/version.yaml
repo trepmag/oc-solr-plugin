@@ -3,3 +3,4 @@
     - Add jsonFacetApi parameter input and processing
     - Fix is_hidden filter
 1.0.3: Improve facet filter behavior, querystring naming and value processing
+1.0.4: Multiple fixes (json.facet wasn't filtering, solr update index commit at the end of the process, etc, ...) and some code enhancements
