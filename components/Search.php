@@ -179,6 +179,19 @@ class Search extends \Cms\Classes\ComponentBase {
             ;
         }
 
+        // Re-key facet filter which might have been set in urlQueryString
+        // property so it doesn't get removed by the facet query condition
+        // bellow.
+        if (!empty($uqsf_array[$this->facetFilterRequestInputName])) {
+            $key_new = -1000;
+            foreach ($uqsf_array[$this->facetFilterRequestInputName] as $key => $value) {
+                if (is_int($key)) {
+                    $uqsf_array[$this->facetFilterRequestInputName][$key_new--] = $value;
+                    unset($uqsf_array[$this->facetFilterRequestInputName][$key]);
+                }
+            }
+        }
+
         // Facet query conditions
         $fri = [];
         if (!empty($uqsf_array[$this->facetFilterRequestInputName])) {
