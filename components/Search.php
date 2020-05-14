@@ -70,12 +70,17 @@ class Search extends \Cms\Classes\ComponentBase {
     public function defineProperties() {
         return [
             'pageSize' => [
-                'title' => 'Page Size',
+                'title' => 'Page size',
                 'description' => 'Numper of items by page.',
                 'default' => $this->pageSize,
                 'type' => 'string',
                 'validationPattern' => '^[0-9]+$',
                 'validationMessage' => 'The Page Size property can contain only numeric symbols'
+            ],
+            'pageSizeInputKey' => [
+                'title' => 'Page size input key',
+                'description' => 'Allow to change the page size using an input (query string). Use a secret input key for security concerns!',
+                'type' => 'string',
             ],
             'facetFields' => [
                 'title' => 'Facet fields',
@@ -209,10 +214,14 @@ class Search extends \Cms\Classes\ComponentBase {
         $this->query->setQuery($qb);
 
         // Pagination
+        $this->pageSize = $this->property('pageSize');
+        if ($this->property('pageSizeInputKey') && Request::input($this->property('pageSizeInputKey'))) {
+            $this->pageSize = Request::input($this->property('pageSizeInputKey'));
+        }
         $this->pageStart = Request::input('page', 1);
-        $this->rowStart = ($this->pageStart - 1) * $this->property('pageSize');
+        $this->rowStart = ($this->pageStart - 1) * $this->pageSize;
         $this->query->setStart($this->rowStart);
-        $this->query->setRows($this->property('pageSize'));
+        $this->query->setRows($this->pageSize);
 
         // Results
         try {
@@ -252,16 +261,16 @@ class Search extends \Cms\Classes\ComponentBase {
         }
 
         $this->page['pageStart'] = $this->pageStart;
-        $this->page['pageSize'] = $this->property('pageSize');
+        $this->page['pageSize'] = $this->pageSize;
         $this->page['rowStart'] = $this->rowStart + 1;
         $this->page['rowEnd'] = min([
-            $this->rowStart + $this->property('pageSize'),
+            $this->rowStart + $this->pageSize,
             $this->getResultsNumFound(),
         ]);
         if ($this->pageStart - 1) {
             $this->page['pagePreviousUrl'] = $this->makeUrl('page', $this->pageStart - 1);
         }
-        if ($this->getResultsNumFound() > $this->rowStart + $this->property('pageSize')) {
+        if ($this->getResultsNumFound() > $this->rowStart + $this->pageSize) {
             $this->page['pageNextUrl'] = $this->makeUrl('page', $this->pageStart + 1);
         }
         $this->page['resultsNumFound'] = $this->getResultsNumFound();
