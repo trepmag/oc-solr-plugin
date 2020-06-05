@@ -10,8 +10,8 @@
     {% else %}
     {{ item.value }} ({{ item.count }})
     {% endif %}
+    {% partial '@facet' facet=item.child %}
   </li>
-  {% partial '@facet' facet=item.child %}
   {% endfor %}
 </ul>
 {% endif %}
