@@ -33,8 +33,8 @@ class Plugin extends PluginBase
     public function register()
     {
         $this->registerConsoleCommand('solr.ping', 'Trepmag\Solr\Console\Ping');
-        $this->registerConsoleCommand('solr.update_index', 'Trepmag\Solr\Console\UpdateIndex');
-        $this->registerConsoleCommand('solr.empty_index', 'Trepmag\Solr\Console\EmptyIndex');
+        $this->registerConsoleCommand('solr.index-update', 'Trepmag\Solr\Console\UpdateIndex');
+        $this->registerConsoleCommand('solr.index-empty', 'Trepmag\Solr\Console\EmptyIndex');
     }
 
     /**

@@ -11,12 +11,19 @@ class EmptyIndex extends Base {
     /**
      * @var string The console command name.
      */
-    protected $name = 'solr:empty_index';
+    protected $name = 'solr:index-empty';
 
     /**
      * @var string The console command description.
      */
     protected $description = 'Empty the Solr server search index.';
+
+    protected function configure()
+    {
+        $this->setAliases([
+            'solr:empty_index',
+        ]);
+    }
 
     /**
      * Execute the console command.

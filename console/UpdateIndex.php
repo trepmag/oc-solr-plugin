@@ -12,12 +12,19 @@ class UpdateIndex extends Base {
     /**
      * @var string The console command name.
      */
-    protected $name = 'solr:update_index';
+    protected $name = 'solr:index-update';
 
     /**
      * @var string The console command description.
      */
     protected $description = 'Update the Solr server search index.';
+
+    protected function configure()
+    {
+        $this->setAliases([
+            'solr:update_index',
+        ]);
+    }
 
     /**
      * Execute the console command.
