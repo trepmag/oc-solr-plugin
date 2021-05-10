@@ -1,8 +1,9 @@
 {
-    "name": "trepmag/solr",
+    "name": "trepmag/solr-plugin",
     "description": "Solr",
     "type": "october-plugin",
     "require": {
+        "composer/installers": "~1.0",
         "solarium/solarium": "^5.1"
     },
     "scripts": {
